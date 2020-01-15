@@ -119,7 +119,9 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun updateLists() {
+        val lists = listDataManager.readLists()
 
+        listsRecyclerView.adapter = ListSelectionRecyclerViewAdapter(lists, this)
     }
 
     /* Intent Setup */

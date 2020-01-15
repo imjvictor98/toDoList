@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,12 +37,11 @@ class ListDetailActivity : AppCompatActivity() {
         listItemsRecyclerView = findViewById(R.id.list_items_recyclerview)
 
         /*Assign an adapter to this Recycler View*/
-        listItemsRecyclerView.adapter =
-            ListItemRecyclerViewAdapter(list)
+        listItemsRecyclerView.adapter = ListItemRecyclerViewAdapter(list)
 
         listItemsRecyclerView.layoutManager = LinearLayoutManager(this)
 
-        addTaskButton.findViewById<FloatingActionButton>(R.id.add_task_button)
+        addTaskButton = findViewById(R.id.add_task_button)
         addTaskButton.setOnClickListener{
             showCreateTaskDialog()
         }

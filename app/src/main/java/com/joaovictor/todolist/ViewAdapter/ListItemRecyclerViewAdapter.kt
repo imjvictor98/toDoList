@@ -9,8 +9,6 @@ import com.joaovictor.todolist.ViewHolder.ListItemViewHolder
 
 class ListItemRecyclerViewAdapter(var list: TaskList): RecyclerView.Adapter<ListItemViewHolder>() {
 
-
-
     //@Override: Recycler View Adapter
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListItemViewHolder {
         /* RecyclerView has to know what Layout to use as the View Holder*/
@@ -25,7 +23,6 @@ class ListItemRecyclerViewAdapter(var list: TaskList): RecyclerView.Adapter<List
     }
 
     override fun onBindViewHolder(holder: ListItemViewHolder, position: Int) {
-
+        holder.taskTextView.text = list.tasks[position]
     }
-
 }
