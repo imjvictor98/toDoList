@@ -8,10 +8,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
+import android.widget.FrameLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.joaovictor.todolist.ListDataManager
+import com.joaovictor.todolist.ListSelectionFragment
 import com.joaovictor.todolist.ViewAdapter.ListSelectionRecyclerViewAdapter
 import com.joaovictor.todolist.R
 import com.joaovictor.todolist.TaskList
@@ -19,21 +21,23 @@ import com.joaovictor.todolist.TaskList
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(),
-    ListSelectionRecyclerViewAdapter.ListSelectionRecyclerViewClickListener {
+    ListSelectionFragment.OnListItemFragmentInteractionListener {
 
-    //Companion
+    //region Static
     companion object {
         /*Used to refer to a list whenever it needs to pass one to a new Activity*/
         val INTENT_LIST_KEY = "list"
         val LIST_DETAIL_REQUEST_CODE = 123
     }
+    //endregion
 
-    //Variables
-    lateinit var listsRecyclerView: RecyclerView
+    //region Variables
+    private var listSelectionFragment: ListSelectionFragment = ListSelectionFragment.newInstance()
+    private var fragmentContainer: FrameLayout? = null
+    //endregion
 
-    val listDataManager: ListDataManager = ListDataManager(this)
+    //region Override: Activity
 
-    //@Override: AppCompatActivity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -43,18 +47,13 @@ class MainActivity : AppCompatActivity(),
             showCreateListDialog()
         }
 
-        /*When this screen shows up it reads every data on internal storage*/
-        val lists = listDataManager.readLists()
+        fragmentContainer = findViewById(R.id.fragment_container)
 
 
-        listsRecyclerView = findViewById(R.id.lists_recyclerview)
-        listsRecyclerView.layoutManager = LinearLayoutManager(this)
-        /* Try to pass data to our adapter */
-        listsRecyclerView.adapter =
-            ListSelectionRecyclerViewAdapter(
-                lists,
-                this
-            )
+        supportFragmentManager/*Lets you add dynamically fragments in runtime*/
+            .beginTransaction()
+            .add(R.id.fragment_container, listSelectionFragment)
+            .commit()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -69,9 +68,9 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    //@Override: Interface Implementation
+    //Interface Implementation
     /*When an item of list is clicked*/
-    override fun listItemClicked(list: TaskList) {
+    override fun onListItemClicked(list: TaskList) {
         showListDetail(list)
     }
 
@@ -84,12 +83,13 @@ class MainActivity : AppCompatActivity(),
             /*Unwrapping data Intent passed-in*/
             data?.let {_ -> /*the let is a method when data is not null execute some block of code*/
                 /*Save the list in internal storage and call updateLists()*/
-                listDataManager.saveList(data.getParcelableExtra(INTENT_LIST_KEY))
-                updateLists()
+                listSelectionFragment.saveList(data.getParcelableExtra(INTENT_LIST_KEY)!!)
             }
         }
     }
+    //endregion
 
+    //region Helpers
     //Helpers
     private fun showCreateListDialog() {
         val dialogTitle = getString(R.string.name_of_list)
@@ -102,13 +102,10 @@ class MainActivity : AppCompatActivity(),
         builder.setTitle(dialogTitle)
         builder.setView(listTitleEditText)
 
-        builder.setPositiveButton(positiveButtonTitle) { dialog, _ ->
+        builder.setPositiveButton(positiveButtonTitle) { dialog, i ->
             val list =
                 TaskList(listTitleEditText.text.toString())
-            listDataManager.saveList(list) //We save data(list) in internal storage
-
-            val recyclerAdapter = listsRecyclerView.adapter as ListSelectionRecyclerViewAdapter
-            recyclerAdapter.addList(list)
+            listSelectionFragment.addList(list) //We save data(list) in internal storage
 
             dialog.dismiss()
             showListDetail(list) /*When we finish to input the name it launches a new Activity*/
@@ -116,12 +113,6 @@ class MainActivity : AppCompatActivity(),
 
         builder.create().show()
 
-    }
-
-    private fun updateLists() {
-        val lists = listDataManager.readLists()
-
-        listsRecyclerView.adapter = ListSelectionRecyclerViewAdapter(lists, this)
     }
 
     /* Intent Setup */
@@ -134,4 +125,5 @@ class MainActivity : AppCompatActivity(),
             LIST_DETAIL_REQUEST_CODE
         )
     }
+    //endregion
 }
